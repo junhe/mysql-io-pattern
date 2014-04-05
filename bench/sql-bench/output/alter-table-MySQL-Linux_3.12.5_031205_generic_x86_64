@@ -1,0 +1,5 @@
+Testing server 'MySQL 5.5.35 0ubuntu0.12.04.2/' at 2014-03-08 16:25:58
+
+Testing of ALTER TABLE
+Testing with 1000 columns and 1000 rows in 100 steps
+Insert data into the table

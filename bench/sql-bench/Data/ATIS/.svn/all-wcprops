@@ -1,0 +1,185 @@
+K 25
+svn:wc:ra_dav:version-url
+V 29
+/svn/!svn/ver/2/5.0/Data/ATIS
+END
+flight_class.txt
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/2/5.0/Data/ATIS/flight_class.txt
+END
+time_interval.txt
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/2/5.0/Data/ATIS/time_interval.txt
+END
+fconnection.txt
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/2/5.0/Data/ATIS/fconnection.txt
+END
+restriction.txt
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/2/5.0/Data/ATIS/restriction.txt
+END
+restrict_carrier.txt
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/2/5.0/Data/ATIS/restrict_carrier.txt
+END
+stop1.txt
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/2/5.0/Data/ATIS/stop1.txt
+END
+food_service.txt
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/2/5.0/Data/ATIS/food_service.txt
+END
+city.txt
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/2/5.0/Data/ATIS/city.txt
+END
+class_of_service.txt
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/2/5.0/Data/ATIS/class_of_service.txt
+END
+compound_class.txt
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/2/5.0/Data/ATIS/compound_class.txt
+END
+flight_fare.txt
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/2/5.0/Data/ATIS/flight_fare.txt
+END
+flight_day.txt
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/2/5.0/Data/ATIS/flight_day.txt
+END
+date_day.txt
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/2/5.0/Data/ATIS/date_day.txt
+END
+flight.txt
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/2/5.0/Data/ATIS/flight.txt
+END
+code_description.txt
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/2/5.0/Data/ATIS/code_description.txt
+END
+day_name.txt
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/2/5.0/Data/ATIS/day_name.txt
+END
+fare.txt
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/2/5.0/Data/ATIS/fare.txt
+END
+ground_service.txt
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/2/5.0/Data/ATIS/ground_service.txt
+END
+airport.txt
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/2/5.0/Data/ATIS/airport.txt
+END
+connect_leg.txt
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/2/5.0/Data/ATIS/connect_leg.txt
+END
+state.txt
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/2/5.0/Data/ATIS/state.txt
+END
+airline.txt
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/2/5.0/Data/ATIS/airline.txt
+END
+restrict_class.txt
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/2/5.0/Data/ATIS/restrict_class.txt
+END
+month_name.txt
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/2/5.0/Data/ATIS/month_name.txt
+END
+stop.txt
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/2/5.0/Data/ATIS/stop.txt
+END
+time_zone.txt
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/2/5.0/Data/ATIS/time_zone.txt
+END
+aircraft.txt
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/2/5.0/Data/ATIS/aircraft.txt
+END
+dual_carrier.txt
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/2/5.0/Data/ATIS/dual_carrier.txt
+END
+transport.txt
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/2/5.0/Data/ATIS/transport.txt
+END
+airport_service.txt
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/2/5.0/Data/ATIS/airport_service.txt
+END

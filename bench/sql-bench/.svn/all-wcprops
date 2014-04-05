@@ -1,0 +1,149 @@
+K 25
+svn:wc:ra_dav:version-url
+V 19
+/svn/!svn/ver/2/5.0
+END
+test-create
+K 25
+svn:wc:ra_dav:version-url
+V 31
+/svn/!svn/ver/2/5.0/test-create
+END
+test-insert
+K 25
+svn:wc:ra_dav:version-url
+V 31
+/svn/!svn/ver/2/5.0/test-insert
+END
+graph-compare-results
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/2/5.0/graph-compare-results
+END
+bench-count-distinct
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/2/5.0/bench-count-distinct
+END
+innotest1
+K 25
+svn:wc:ra_dav:version-url
+V 29
+/svn/!svn/ver/2/5.0/innotest1
+END
+innotest1a
+K 25
+svn:wc:ra_dav:version-url
+V 30
+/svn/!svn/ver/2/5.0/innotest1a
+END
+test-transactions
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/2/5.0/test-transactions
+END
+compare-results
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/2/5.0/compare-results
+END
+innotest2
+K 25
+svn:wc:ra_dav:version-url
+V 29
+/svn/!svn/ver/2/5.0/innotest2
+END
+innotest1b
+K 25
+svn:wc:ra_dav:version-url
+V 30
+/svn/!svn/ver/2/5.0/innotest1b
+END
+innotest2a
+K 25
+svn:wc:ra_dav:version-url
+V 30
+/svn/!svn/ver/2/5.0/innotest2a
+END
+test-big-tables
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/2/5.0/test-big-tables
+END
+innotest2b
+K 25
+svn:wc:ra_dav:version-url
+V 30
+/svn/!svn/ver/2/5.0/innotest2b
+END
+test-wisconsin
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/!svn/ver/2/5.0/test-wisconsin
+END
+bench-init.pl
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/2/5.0/bench-init.pl
+END
+test-select
+K 25
+svn:wc:ra_dav:version-url
+V 31
+/svn/!svn/ver/2/5.0/test-select
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 26
+/svn/!svn/ver/2/5.0/README
+END
+copy-db
+K 25
+svn:wc:ra_dav:version-url
+V 27
+/svn/!svn/ver/2/5.0/copy-db
+END
+crash-me
+K 25
+svn:wc:ra_dav:version-url
+V 28
+/svn/!svn/ver/2/5.0/crash-me
+END
+server-cfg
+K 25
+svn:wc:ra_dav:version-url
+V 30
+/svn/!svn/ver/2/5.0/server-cfg
+END
+test-connect
+K 25
+svn:wc:ra_dav:version-url
+V 32
+/svn/!svn/ver/2/5.0/test-connect
+END
+test-alter-table
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/2/5.0/test-alter-table
+END
+run-all-tests
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/2/5.0/run-all-tests
+END
+test-ATIS
+K 25
+svn:wc:ra_dav:version-url
+V 29
+/svn/!svn/ver/2/5.0/test-ATIS
+END
