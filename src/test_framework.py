@@ -16,7 +16,6 @@ def start_mysqld(tracepath):
            '--thread-cache-size=1']
     subprocess.Popen(cmd)
 
-
 def stop_mysqld():
     cmd = "mysqladmin -u root shutdown"
     cmd = cmd.split()
@@ -37,7 +36,7 @@ def test_main():
     scriptlist = [
             'cleanup.py',
             'create_table.py',
-            'get_version.py'
+            'get_version.py',
             'retrieving_data.py',
             #dictionary_cursor.py  
             'insert_image.py',
@@ -45,7 +44,6 @@ def test_main():
             'prepared_statement.py']
     for scriptname in scriptlist:
         run_one_bench(scriptname)
-        break
 
 def main():
     test_main()
