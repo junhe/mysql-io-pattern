@@ -29,7 +29,9 @@ def run_one_bench(scriptname):
     time.sleep(2)
     run_script(scriptname)
     time.sleep(2)
+    subprocess.call(['sync'])
     stop_mysqld()
+    subprocess.call(['sync'])
     time.sleep(2)
 
 def test_main():
