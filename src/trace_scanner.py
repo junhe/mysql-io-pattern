@@ -10,18 +10,26 @@ def line_to_dic(line):
             'ret' :None,
           }
     line = line.replace('"', '')
-    mo = re.match(r'(\S+)\s+(\S+)\s+(\w+)\((.+)\)\s+=\s+(\S+)',
+    #mo = re.match(r'(\S+)\s+(\S+)\s+(\w+)\((.+)\)\s+=\s+(\S+)',
+    mo = re.match(r'(\S+)\s+(\w+)\((.+)\)\s+=\s+(\S+)',
                   line)
     if mo:
         #print mo.groups()
-        dic['pid'] = mo.group(1)
-        dic['time'] = mo.group(2)
-        dic['callname'] = mo.group(3)
-        dic['args'] = mo.group(4).split(',')
-        dic['ret'] = mo.group(5)
+        i = 1
+        #dic['pid'] = mo.group(i)
+        #i += 1
+        dic['time'] = mo.group(i)
+        i += 1
+        dic['callname'] = mo.group(i)
+        i += 1
+        dic['args'] = mo.group(i).split(',')
+        i += 1
+        dic['ret'] = mo.group(i)
         #if dic['callname'] == 'open':
-        if dic['callname'] == 'fsync':
-            print dic
+        #if dic['callname'] == 'fsync':
+            #print dic
+    else:
+        print 'cannot parse:', line
 
 def scan_trace(tracepath):
     f = open(tracepath, 'r')
@@ -37,7 +45,5 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
 
 

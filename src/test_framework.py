@@ -5,6 +5,7 @@ def start_mysqld(tracepath):
     cmd = ['strace',
            '-o', tracepath,
            '-f', '-ttt',
+           '-ff',
            '-e', 'trace=open,close,fsync,sync,read,'\
                  'write,pread,pwrite,lseek,unlink,fcntl,mmap,munmap',
            '-s', '8',
