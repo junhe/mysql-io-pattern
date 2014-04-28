@@ -39,6 +39,7 @@ def line_to_dic(line):
         dic['args'] = mo.group(i).split(',')
         i += 1
         dic['ret'] = mo.group(i)
+        dic['original_line'] = line
         #if dic['callname'] == 'open':
         #if dic['callname'] == 'fsync':
             #print dic
@@ -102,34 +103,71 @@ def get_dic_from_resumed(line):
 
     return dic
 
+def maintain_filepath(fdmap, entrydict):
+    """
+    if entrydict is open:
+        add the fd->path mapping to fdmap
+    else if entrydict is close:
+        remove the fd->path mapping to fdmap
+    else if entrydict is read,write,...         
+        get filepath from fdmap by the fd
+    add 'filepath' to entrydict
+    """
+    callname = entrydict['callname']
+    pid = entrydict['pid']
+    filepath = None
+
+    print entrydict['original_line']
+    if callname == 'open':
+        filepath = entrydict['args'][0]
+        fd = entrydict['ret']
+        if not fdmap.has_key(pid):
+            fdmap[pid] = {}
+        fdmap[pid][fd] = filepath
+    elif callname == 'close':
+        fd = entrydict['args'][0]
+        if fdmap.has_key(pid) and fdmap[pid].has_key(fd):
+            filepath = fdmap[pid][fd]
+            del fdmap[pid][fd]
+    elif callname in \
+            ['write', 'read', 'pwrite', 'pread', 'fsync']:
+        fd = entrydict['args'][0]
+        if fdmap.has_key(pid) and fdmap[pid].has_key(fd):
+            filepath = fdmap[pid][fd]
+
+    entrydict['filepath'] = filepath
 
 def scan_trace(tracepath):
     f = open(tracepath, 'r')
     unfinished_dic = {} #indexed by call name
     entrylist = []
+    fdmap = {}
     for line in f:
         #print line
         line = line.strip()
         if match_line(line):
             # normal line
-            entrylist.append( line_to_dic(line) )
+            entrydict = line_to_dic(line) 
         #elif 'unfinished' in line: # 
         elif line.endswith(UNFINISHED_MARK):
             udic = get_dic_from_unfinished(line)
-            #print udic
             unfinished_dic[udic['callname']] = udic
-            #pprint.pprint(unfinished_dic)
+            continue
         elif 'resumed' in line:
             udic = get_dic_from_resumed(line)
             name = udic['callname']
             completeline = unfinished_dic[name]['trimedline'] +\
                             udic['trimedline']
             #print completeline
-            dic = line_to_dic(completeline)
-            entrylist.append( dic )
+            entrydict = line_to_dic(completeline)
             del unfinished_dic[name]
-    f.close()
 
+        entrylist.append( entrydict )
+        maintain_filepath( fdmap, entrydict )
+
+
+
+    f.close()
     pprint.pprint( entrylist )
 
 def main():
