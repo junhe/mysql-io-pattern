@@ -127,6 +127,7 @@ def scan_trace(tracepath):
             #print completeline
             dic = line_to_dic(completeline)
             entrylist.append( dic )
+            del unfinished_dic[name]
     f.close()
 
     pprint.pprint( entrylist )
