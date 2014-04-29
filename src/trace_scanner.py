@@ -38,7 +38,8 @@ def line_to_dic(line):
         i += 1
         dic['callname'] = mo.group(i)
         i += 1
-        dic['args'] = mo.group(i).split(',')
+        args = mo.group(i).split(',')
+        dic['args'] = [ x.strip() for x in args ]
         i += 1
         dic['ret'] = mo.group(i)
         dic['original_line'] = line
@@ -142,6 +143,29 @@ def maintain_filep(filep, entrydict):
             filep[pid][fd] = {}
         filep[pid][fd]['filepath'] = filepath
         filep[pid][fd]['pos']      = 0
+    elif callname == 'openat':
+        filepath = entrydict['args'][1]
+        fd = entrydict['ret']
+        if not filep.has_key(pid):
+            filep[pid] = {}
+        if not filep[pid].has_key(fd):
+            filep[pid][fd] = {}
+        filep[pid][fd]['filepath'] = filepath
+        filep[pid][fd]['pos']      = 0
+    elif callname == 'accept':
+        filepath = 'NETWORK'
+        fd = entrydict['ret']
+        if not filep.has_key(pid):
+            filep[pid] = {}
+        if not filep[pid].has_key(fd):
+            filep[pid][fd] = {}
+        filep[pid][fd]['filepath'] = filepath
+        filep[pid][fd]['pos']      = 0
+    elif callname == 'clone':
+        newpid = entrydict['ret']
+        if 'CLONE_FILES' in entrydict['args'][1]:
+            filep[newpid] = filep[pid]
+            
     elif callname in ['dup', 'dup2', 'dup3']:
         newfd = entrydict['ret']
         assert newfd != '-1'
@@ -169,7 +193,11 @@ def maintain_filep(filep, entrydict):
         fd = entrydict['args'][0]
         try:
             filepath = filep[pid][fd]['filepath']
-        except:
+        except Exception as ex:
+            pprint.pprint( entrydict )
+            pprint.pprint( filep )
+            print ex
+
             filepath = fd
 
         try:
@@ -207,19 +235,19 @@ def scan_trace(tracepath):
             table =[])
 
     for line in f:
-        #print line
+        print line,
         line = line.strip()
         if match_line(line):
             # normal line
             entrydict = line_to_dic(line) 
         #elif 'unfinished' in line: # 
         elif line.endswith(UNFINISHED_MARK):
-            print 'unfinished line:', line 
+            #print 'unfinished line:', line 
             udic = get_dic_from_unfinished(line)
             unfinished_dic[(udic['pid'], udic['callname'])] = udic
             continue
         elif 'resumed' in line:
-            print 'resumed line:', line 
+            #print 'resumed line:', line 
             udic = get_dic_from_resumed(line)
             name = udic['callname']
             pid = udic['pid']
