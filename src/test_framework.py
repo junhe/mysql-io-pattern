@@ -1,4 +1,6 @@
 import subprocess
+import os
+import sys
 import time
 
 def start_mysqld(tracepath):
@@ -7,7 +9,8 @@ def start_mysqld(tracepath):
            '-f', '-ttt',
            #'-ff',
            '-e', 'trace=open,close,fsync,sync,read,'\
-                 'write,pread,pwrite,lseek,unlink,fcntl,mmap,munmap',
+                 'write,pread,pwrite,lseek,unlink,fcntl,mmap,munmap,'\
+                 'dup,dup2,dup3,fork,vfork',
            '-s', '8',
            'mysqld',
            '--innodb-thread-concurrency=1',
@@ -25,8 +28,8 @@ def stop_mysqld():
 def run_script(scriptname):
     subprocess.call(['python', scriptname])
 
-def run_one_bench(scriptname):
-    start_mysqld('./traces/'+scriptname+'.trace')
+def run_one_bench(targetdir, scriptname):
+    start_mysqld( os.path.join(targetdir, scriptname+'.trace') )
     time.sleep(2)
     run_script(scriptname)
     time.sleep(2)
@@ -35,7 +38,10 @@ def run_one_bench(scriptname):
     subprocess.call(['sync'])
     time.sleep(2)
 
-def test_main():
+def test_main(targetdir):
+    if not os.path.exists(targetdir):
+        os.makedirs(targetdir)
+
     scriptlist = [
             'cleanup.py',
             'create_table.py',
@@ -46,10 +52,14 @@ def test_main():
             'read_image.py',
             'prepared_statement.py']
     for scriptname in scriptlist:
-        run_one_bench(scriptname)
+        run_one_bench(targetdir, scriptname)
 
-def main():
-    test_main()
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) != 2:
+        print 'usage:', sys.argv[0], 'targetdir'
+        exit(1)
+    targetdir = sys.argv[1]
+
+    test_main(targetdir)
+

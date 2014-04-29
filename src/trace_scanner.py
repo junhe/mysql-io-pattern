@@ -3,6 +3,8 @@ import pprint
 import glob
 import re
 
+import dataframe
+
 UNFINISHED_MARK = '<unfinished ...>'
 
 def match_line(line):
@@ -129,11 +131,15 @@ def maintain_filepath(fdmap, entrydict):
         if fdmap.has_key(pid) and fdmap[pid].has_key(fd):
             filepath = fdmap[pid][fd]
             del fdmap[pid][fd]
+        else:
+            filepath = fd
     elif callname in \
-            ['write', 'read', 'pwrite', 'pread', 'fsync']:
+            ['write', 'read', 'pwrite', 'pread', 'fsync', 'lseek']:
         fd = entrydict['args'][0]
         if fdmap.has_key(pid) and fdmap[pid].has_key(fd):
             filepath = fdmap[pid][fd]
+        else:
+            filepath = fd
 
     entrydict['filepath'] = filepath
 
@@ -142,6 +148,11 @@ def scan_trace(tracepath):
     unfinished_dic = {} #indexed by call name
     entrylist = []
     fdmap = {}
+
+    df = dataframe.DataFrame(
+            header=['pid', 'time', 'callname', 'filepath'],
+            table =[])
+
     for line in f:
         #print line
         line = line.strip()
@@ -165,10 +176,16 @@ def scan_trace(tracepath):
         entrylist.append( entrydict )
         maintain_filepath( fdmap, entrydict )
 
+        rowdic = {}
+        for col in df.header:
+            rowdic[col] = entrydict[col]
+
+        df.addRowByDict( rowdic )
 
 
+    print df.toStr()
     f.close()
-    pprint.pprint( entrylist )
+    #pprint.pprint( entrylist )
 
 def main():
     traceprefix = sys.argv[1]
