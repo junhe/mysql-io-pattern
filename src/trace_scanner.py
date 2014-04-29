@@ -151,29 +151,23 @@ def maintain_filep(filep, entrydict):
             exit(1)
         #pprint.pprint( filep )
         fd = oldfd
-        if filep.has_key(pid) \
-                and filep[pid].has_key(fd) \
-                and filep[pid][fd].has_key('filepath'):
+        try:
             filepath = filep[pid][fd]['filepath']
-        else:
+        except:
             filepath = fd
     elif callname == 'close':
         fd = entrydict['args'][0]
-        if filep.has_key(pid) \
-                and filep[pid].has_key(fd) \
-                and filep[pid][fd].has_key('filepath'):
+        try:
             filepath = filep[pid][fd]['filepath']
             del filep[pid][fd]
-        else:
+        except:
             filepath = fd
     elif callname in \
             ['write', 'read', 'pwrite', 'pread', 'fsync', 'lseek']:
         fd = entrydict['args'][0]
-        if filep.has_key(pid) \
-                and filep[pid].has_key(fd) \
-                and filep[pid][fd].has_key('filepath'):
+        try:
             filepath = filep[pid][fd]['filepath']
-        else:
+        except:
             filepath = fd
 
     entrydict['filepath'] = filepath
