@@ -140,6 +140,23 @@ def maintain_filep(filep, entrydict):
             filep[pid][fd] = {}
         filep[pid][fd]['filepath'] = filepath
         filep[pid][fd]['pos']      = 0
+    elif callname in ['dup', 'dup2', 'dup3']:
+        newfd = entrydict['ret']
+        assert newfd != '-1'
+        oldfd = entrydict['args'][0]
+        if filep[pid].has_key(oldfd):
+            filep[pid][newfd] = filep[pid][oldfd]
+        else:
+            print 'dup() an non-existing oldfd'
+            exit(1)
+        #pprint.pprint( filep )
+        fd = oldfd
+        if filep.has_key(pid) \
+                and filep[pid].has_key(fd) \
+                and filep[pid][fd].has_key('filepath'):
+            filepath = filep[pid][fd]['filepath']
+        else:
+            filepath = fd
     elif callname == 'close':
         fd = entrydict['args'][0]
         if filep.has_key(pid) \
@@ -155,7 +172,7 @@ def maintain_filep(filep, entrydict):
         if filep.has_key(pid) \
                 and filep[pid].has_key(fd) \
                 and filep[pid][fd].has_key('filepath'):
-            filepath = filep[pid][fd]
+            filepath = filep[pid][fd]['filepath']
         else:
             filepath = fd
 
