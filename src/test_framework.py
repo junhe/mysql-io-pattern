@@ -8,9 +8,10 @@ def start_mysqld(tracepath):
            '-o', tracepath,
            '-f', '-ttt',
            #'-ff',
-           '-e', 'trace=open,close,fsync,sync,read,'\
-                 'write,pread,pwrite,lseek,unlink,fcntl,mmap,munmap,'\
-                 'dup,dup2,dup3,fork,vfork',
+           #'-e', 'trace=open,close,fsync,sync,read,'\
+                 ##'write,pread,pwrite,lseek,unlink,fcntl,mmap,munmap,'\
+                 #'write,pread,pwrite,lseek,'\
+                 #'dup,dup2,dup3,fork,vfork',
            '-s', '8',
            'mysqld',
            '--innodb-thread-concurrency=1',

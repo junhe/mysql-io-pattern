@@ -132,7 +132,7 @@ def maintain_filep(filep, entrydict):
     offset   = None
     length   = None
 
-    print entrydict['original_line']
+    #print entrydict['original_line']
     if callname == 'open':
         filepath = entrydict['args'][0]
         fd = entrydict['ret']
@@ -214,17 +214,24 @@ def scan_trace(tracepath):
             entrydict = line_to_dic(line) 
         #elif 'unfinished' in line: # 
         elif line.endswith(UNFINISHED_MARK):
+            print 'unfinished line:', line 
             udic = get_dic_from_unfinished(line)
-            unfinished_dic[udic['callname']] = udic
+            unfinished_dic[(udic['pid'], udic['callname'])] = udic
             continue
         elif 'resumed' in line:
+            print 'resumed line:', line 
             udic = get_dic_from_resumed(line)
             name = udic['callname']
-            completeline = unfinished_dic[name]['trimedline'] +\
+            pid = udic['pid']
+            try:
+                completeline = unfinished_dic[(pid, name)]['trimedline'] +\
                             udic['trimedline']
-            #print completeline
-            entrydict = line_to_dic(completeline)
-            del unfinished_dic[name]
+                entrydict = line_to_dic(completeline)
+                del unfinished_dic[(pid, name)]
+            except Exception as ex:
+                print ex
+                print unfinished_dic
+                raise
 
         entrylist.append( entrydict )
         maintain_filep( filep, entrydict )
@@ -234,7 +241,6 @@ def scan_trace(tracepath):
             rowdic[col] = entrydict[col]
 
         df.addRowByDict( rowdic )
-
 
     print df.toStr()
     f.close()
