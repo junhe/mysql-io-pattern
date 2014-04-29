@@ -133,6 +133,13 @@ def maintain_filep(filep, entrydict):
     offset   = None
     length   = None
 
+    if entrydict['ret'] == '-1':
+        # failed..
+        entrydict['filepath'] = filepath
+        entrydict['offset'] = offset
+        entrydict['length'] = length
+        return
+
     #print entrydict['original_line']
     if callname == 'open':
         filepath = entrydict['args'][0]
