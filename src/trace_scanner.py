@@ -129,9 +129,9 @@ def maintain_filep(filep, entrydict):
     """
     callname = entrydict['callname']
     pid = entrydict['pid']
-    filepath = None
-    offset   = None
-    length   = None
+    filepath = 'NA'
+    offset   = 'NA'
+    length   = 'NA'
 
     if entrydict['ret'] == '-1':
         # failed..
@@ -188,6 +188,8 @@ def maintain_filep(filep, entrydict):
             filepath = filep[pid][fd]['filepath']
         except:
             filepath = fd
+    elif callname == 'unlink':
+        filepath = entrydict['args'][0]
     elif callname == 'close':
         fd = entrydict['args'][0]
         try:
@@ -238,11 +240,12 @@ def scan_trace(tracepath):
     filep = {}
 
     df = dataframe.DataFrame(
-            header=['pid', 'time', 'callname', 'filepath', 'offset', 'length'],
+            header=['pid', 'time', 'callname', 
+                    'offset', 'length', 'filepath'],
             table =[])
 
     for line in f:
-        print line,
+        #print line,
         line = line.strip()
         if match_line(line):
             # normal line
@@ -277,19 +280,18 @@ def scan_trace(tracepath):
 
         df.addRowByDict( rowdic )
 
-    print df.toStr()
     f.close()
     #pprint.pprint( entrylist )
+    return df
 
 def main():
-    traceprefix = sys.argv[1]
-    filelist = glob.glob(traceprefix+"*")
-    #print filelist
-    for filepath in filelist:
-        print filepath
-        scan_trace(filepath)
-        #break
-    #line_to_dic('7499  1396728590.779812 open("./mysql/func.MYD", O_RDWR) = 30')
+    if len(sys.argv) != 2:
+        print 'usage: python', sys.argv[0], 'tracepath'
+    filepath = sys.argv[1]
+    df = scan_trace(filepath)
+    df.addColumn(key='trace_name', value=os.path.basename(filepath))
+    with open(filepath+'.table', 'w') as f:
+        f.write(df.toStr())
 
 if __name__ == '__main__':
     main()
