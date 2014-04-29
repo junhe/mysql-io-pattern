@@ -129,6 +129,8 @@ def maintain_filep(filep, entrydict):
     callname = entrydict['callname']
     pid = entrydict['pid']
     filepath = None
+    offset   = None
+    length   = None
 
     print entrydict['original_line']
     if callname == 'open':
@@ -149,7 +151,7 @@ def maintain_filep(filep, entrydict):
         else:
             print 'dup() an non-existing oldfd'
             exit(1)
-        #pprint.pprint( filep )
+
         fd = oldfd
         try:
             filepath = filep[pid][fd]['filepath']
@@ -170,7 +172,29 @@ def maintain_filep(filep, entrydict):
         except:
             filepath = fd
 
+        try:
+            if callname in ['write', 'read']:
+                offset = filep[pid][fd]['pos']
+                length = int(entrydict['ret'])
+                filep[pid][fd]['pos'] = offset + length
+            elif callname in ['pread', 'pwrite']:
+                # they don't affect filep offset 
+                offset = int(entrydict['args'][3])
+                length = int(entrydict['ret'])
+            elif callname in ['lseek']:
+                #whence = entrydict['args'][2]
+                #offset = int(entrydict['args'][1])
+                filep[pid][fd]['pos'] = int(entrydict['ret'])
+        except Exception as ex:
+            pass
+            #print ex
+            #pprint.pprint( entrydict )
+            #pprint.pprint( filep )
+            #raise
+
     entrydict['filepath'] = filepath
+    entrydict['offset'] = offset
+    entrydict['length'] = length
 
 def scan_trace(tracepath):
     f = open(tracepath, 'r')
@@ -179,7 +203,7 @@ def scan_trace(tracepath):
     filep = {}
 
     df = dataframe.DataFrame(
-            header=['pid', 'time', 'callname', 'filepath'],
+            header=['pid', 'time', 'callname', 'filepath', 'offset', 'length'],
             table =[])
 
     for line in f:
