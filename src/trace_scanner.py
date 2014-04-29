@@ -105,8 +105,19 @@ def get_dic_from_resumed(line):
 
     return dic
 
-def maintain_filepath(fdmap, entrydict):
+def maintain_filep(filep, entrydict):
     """
+    structure of filep =
+                    {
+                      pid001: {
+                        fd001: {
+                                 'filepath':
+                                 'pos':
+                               }
+                              }
+                    }
+
+    ########### OLD ###############
     if entrydict is open:
         add the fd->path mapping to fdmap
     else if entrydict is close:
@@ -123,21 +134,28 @@ def maintain_filepath(fdmap, entrydict):
     if callname == 'open':
         filepath = entrydict['args'][0]
         fd = entrydict['ret']
-        if not fdmap.has_key(pid):
-            fdmap[pid] = {}
-        fdmap[pid][fd] = filepath
+        if not filep.has_key(pid):
+            filep[pid] = {}
+        if not filep[pid].has_key(fd):
+            filep[pid][fd] = {}
+        filep[pid][fd]['filepath'] = filepath
+        filep[pid][fd]['pos']      = 0
     elif callname == 'close':
         fd = entrydict['args'][0]
-        if fdmap.has_key(pid) and fdmap[pid].has_key(fd):
-            filepath = fdmap[pid][fd]
-            del fdmap[pid][fd]
+        if filep.has_key(pid) \
+                and filep[pid].has_key(fd) \
+                and filep[pid][fd].has_key('filepath'):
+            filepath = filep[pid][fd]['filepath']
+            del filep[pid][fd]
         else:
             filepath = fd
     elif callname in \
             ['write', 'read', 'pwrite', 'pread', 'fsync', 'lseek']:
         fd = entrydict['args'][0]
-        if fdmap.has_key(pid) and fdmap[pid].has_key(fd):
-            filepath = fdmap[pid][fd]
+        if filep.has_key(pid) \
+                and filep[pid].has_key(fd) \
+                and filep[pid][fd].has_key('filepath'):
+            filepath = filep[pid][fd]
         else:
             filepath = fd
 
@@ -147,7 +165,7 @@ def scan_trace(tracepath):
     f = open(tracepath, 'r')
     unfinished_dic = {} #indexed by call name
     entrylist = []
-    fdmap = {}
+    filep = {}
 
     df = dataframe.DataFrame(
             header=['pid', 'time', 'callname', 'filepath'],
@@ -174,7 +192,7 @@ def scan_trace(tracepath):
             del unfinished_dic[name]
 
         entrylist.append( entrydict )
-        maintain_filepath( fdmap, entrydict )
+        maintain_filep( filep, entrydict )
 
         rowdic = {}
         for col in df.header:
