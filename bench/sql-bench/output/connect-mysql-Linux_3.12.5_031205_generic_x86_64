@@ -1,4 +1,4 @@
-Testing server 'MySQL 5.5.35 0ubuntu0.12.04.2/' at 2014-03-09  0:37:45
+Testing server 'MySQL 5.5.37 0ubuntu0.12.04.1/' at 2014-04-29 16:01:13
 
 Testing the speed of connecting to the server and sending of data
 Connect tests are done 10000 times and other tests 100000 times

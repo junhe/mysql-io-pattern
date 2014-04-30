@@ -1,5 +1,7 @@
-Testing server 'MySQL 5.5.35 0ubuntu0.12.04.2/' at 2014-03-09  0:37:34
+Testing server 'MySQL 5.5.37 0ubuntu0.12.04.1/' at 2014-04-29 16:00:43
 
 Testing of ALTER TABLE
 Testing with 1000 columns and 1000 rows in 100 steps
 Insert data into the table
+Time for insert (1000) 9 wallclock secs ( 0.03 usr  0.02 sys +  0.00 cusr  0.00 csys =  0.05 CPU)
+

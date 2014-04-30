@@ -269,7 +269,8 @@ def scan_trace(tracepath):
             except Exception as ex:
                 print ex
                 print unfinished_dic
-                raise
+                continue
+                #raise
 
         entrylist.append( entrydict )
         maintain_filep( filep, entrydict )
@@ -288,6 +289,7 @@ def main():
     if len(sys.argv) != 2:
         print 'usage: python', sys.argv[0], 'tracepath'
     filepath = sys.argv[1]
+    print 'Doing', filepath, '...........'
     df = scan_trace(filepath)
     df.addColumn(key='trace_name', value=os.path.basename(filepath))
     with open(filepath+'.table', 'w') as f:

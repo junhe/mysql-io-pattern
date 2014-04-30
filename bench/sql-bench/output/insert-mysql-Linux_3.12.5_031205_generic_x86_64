@@ -1,0 +1,6 @@
+Testing server 'MySQL 5.5.37 0ubuntu0.12.04.1/' at 2014-04-29 16:01:14
+
+Testing the speed of inserting data into 1 table and do some selects on it.
+The tests are done with a table that has 100000 rows.
+
+Generating random keys
