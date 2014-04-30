@@ -43,12 +43,41 @@ def start_mysqld(tracepath):
            '--max-delayed-threads=1',
            '--performance-schema-max-thread-instances=1',
            '--thread-cache-size=1']
-    subprocess.Popen(cmd)
+    proc = subprocess.Popen(cmd)
+    #proc.wait()
+
+def get_pid_by_name(procname):
+    cmd = ['pgrep', procname]
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    pid = p.communicate()[0]
+    pid = pid.strip()
+
+    return pid
+
 
 def stop_mysqld():
-    cmd = "mysqladmin -u root -p8888 shutdown"
-    cmd = cmd.split()
-    subprocess.call(cmd)
+    # get pid of strace
+    stracepid = get_pid_by_name('strace')
+
+    while len(stracepid) != 0:
+        cmd = ['pkill', '-TERM', '-P', stracepid]
+        subprocess.call(cmd)
+        print 'We tried to kill strace', stracepid
+        print 'wait for a while...'
+        time.sleep(4)
+
+        stracepid = get_pid_by_name('strace')
+
+        print 'Can we find strace anymore?', stracepid
+        time.sleep(1)
+
+    #cmd = "mysqladmin -u root -p8888 shutdown"
+    #cmd = cmd.split()
+    #subprocess.call(cmd)
+    
+    #print 'tried to stop mysqld'
+    #subprocess.call("sudo netstat -tap | grep mysql", shell=True)
+    #time.sleep(2)
 
 def run_sqlbench(testname):
     print 'in run_sqlbench***********'
@@ -88,15 +117,16 @@ def run_script(scriptname):
         run_tpcc()
 
 def run_one_bench(targetdir, scriptname):
+    stop_mysqld()
+    time.sleep(2)
+
     start_mysqld( os.path.join(targetdir, scriptname+'.trace') )
+    #print 'skipped starting mysqld'
     time.sleep(2)
 
     run_script(scriptname)
     time.sleep(2)
     subprocess.call(['sync'])
-    stop_mysqld()
-    subprocess.call(['sync'])
-    time.sleep(2)
 
 def test_main(targetdir):
     if not os.path.exists(targetdir):
