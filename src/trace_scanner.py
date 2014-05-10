@@ -221,6 +221,7 @@ def maintain_filep(filep, entrydict):
             elif callname in ['lseek']:
                 #whence = entrydict['args'][2]
                 #offset = int(entrydict['args'][1])
+                offset = int(entrydict['ret'])
                 filep[pid][fd]['pos'] = int(entrydict['ret'])
         except Exception as ex:
             pass
@@ -236,16 +237,22 @@ def maintain_filep(filep, entrydict):
 def scan_trace(tracepath):
     f = open(tracepath, 'r')
     unfinished_dic = {} #indexed by call name
-    entrylist = []
+    #entrylist = []
     filep = {}
 
-    df = dataframe.DataFrame(
-            header=['pid', 'time', 'callname', 
-                    'offset', 'length', 'filepath'],
-            table =[])
+    tablefile = open(tracepath+'.table', 'w')
+    header=['pid', 'time', 'callname', 
+            'offset', 'length', 'filepath', 'trace_name']
+    tablefile.write( " ".join(header) + "\n" )
 
+    trace_name = os.path.basename(tracepath)
+
+    cnt = 0
     for line in f:
         #print line,
+        if cnt % 5000 == 0:
+            print '.',
+            cnt += 1
         line = line.strip()
         if match_line(line):
             # normal line
@@ -272,18 +279,20 @@ def scan_trace(tracepath):
                 continue
                 #raise
 
-        entrylist.append( entrydict )
+        #entrylist.append( entrydict )
         maintain_filep( filep, entrydict )
 
-        rowdic = {}
-        for col in df.header:
-            rowdic[col] = entrydict[col]
+        rowlist = []
+        entrydict['trace_name'] = trace_name
+        for col in header:
+            rowlist.append(entrydict[col])
 
-        df.addRowByDict( rowdic )
+        rowlist = [ str(x) for x in rowlist ]
+        tablefile.write( " ".join(rowlist) + "\n" )
 
     f.close()
     #pprint.pprint( entrylist )
-    return df
+    tablefile.close()
 
 def main():
     if len(sys.argv) != 2:
@@ -291,9 +300,6 @@ def main():
     filepath = sys.argv[1]
     print 'Doing', filepath, '...........'
     df = scan_trace(filepath)
-    df.addColumn(key='trace_name', value=os.path.basename(filepath))
-    with open(filepath+'.table', 'w') as f:
-        f.write(df.toStr())
 
 if __name__ == '__main__':
     main()

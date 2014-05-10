@@ -33,9 +33,9 @@ def start_mysqld(tracepath):
            '-o', tracepath,
            '-f', '-ttt',
            #'-ff',
-           #'-e', 'trace=open,openat,accept,close,fsync,sync,read,'\
-                 #'write,pread,pwrite,lseek,'\
-                 #'dup,dup2,dup3,clone,unlink',
+           '-e', 'trace=open,openat,accept,close,fsync,sync,read,'\
+                 'write,pread,pwrite,lseek,'\
+                 'dup,dup2,dup3,clone,unlink',
            '-s', '8',
            'mysqld',
            '--innodb-thread-concurrency=1',
@@ -60,11 +60,15 @@ def stop_mysqld():
     stracepid = get_pid_by_name('strace')
 
     while len(stracepid) != 0:
+        cmd = ['stop', 'mysql']
+        subprocess.call(cmd)
+        time.sleep(1)
+
         cmd = ['pkill', '-TERM', '-P', stracepid]
         subprocess.call(cmd)
         print 'We tried to kill strace', stracepid
         print 'wait for a while...'
-        time.sleep(4)
+        time.sleep(6)
 
         stracepid = get_pid_by_name('strace')
 
@@ -133,9 +137,6 @@ def test_main(targetdir):
         os.makedirs(targetdir)
 
     #scriptlist = tinyscriptlist+sqlbenchlist
-
-    # The following 3 test are special,
-    # they have limited transactions  
     scriptlist = ['tpcc']
     for scriptname in scriptlist:
         run_one_bench(targetdir, scriptname)
