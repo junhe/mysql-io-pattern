@@ -42,6 +42,12 @@ After running, the traces will be in target-trace-dir.
 You can choose which benchmark to run in test_framework.py.
 Please search 'scriptlist'.
 
+To run a little demo, you can do
+cd ./src
+python test_framework.py /tmp
+
+The default will run TutorialBench. 
+
 To parse the trace
 =================
 cd ./src/
