@@ -137,7 +137,8 @@ def test_main(targetdir):
         os.makedirs(targetdir)
 
     #scriptlist = tinyscriptlist+sqlbenchlist
-    scriptlist = ['tpcc']
+    scriptlist = tinyscriptlist
+    #scriptlist = ['tpcc']
     for scriptname in scriptlist:
         run_one_bench(targetdir, scriptname)
     #run_one_bench(targetdir, 'test-wisconsin')
