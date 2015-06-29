@@ -5,12 +5,14 @@ In this project we study the I/O pattern (system call level) of MySql.
 
 Source code tree
 ================
-./README.md           This file.
-./bench               SqlBench source code
-./script/             R analysis code
-./install-mysql.sh    shell code to prepare environment
-./tpcc-mysql          TPC-C for MySql source code
-./src                 TutorialBench, trace collector, trace parser
+
+
+- ./README.md           This file.
+- ./bench               SqlBench source code
+- ./script/             R analysis code
+- ./install-mysql.sh    shell code to prepare environment
+- ./tpcc-mysql          TPC-C for MySql source code
+- ./src                 TutorialBench, trace collector, trace parser
 
 
 
