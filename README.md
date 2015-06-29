@@ -32,6 +32,9 @@ just replace all 8888 in the source coode. with your password.
 
 The script above does not prepare the environment for TPC-C. 
 To prepare TPCC, please follow in structions here:
+```
+sudo apt-get install libmysqlclient-dev
+```
 http://www.mysqlperformanceblog.com/2013/07/01/tpcc-mysql-simple-usage-steps-and-how-to-build-graphs-with-gnuplot/
 
 To collect traces
