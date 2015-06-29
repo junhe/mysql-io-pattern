@@ -21,7 +21,7 @@ Linux distribution though.
 
 To prepare the environment
 =================
-./install-mysql.sh
+`./install-mysql.sh`
 
 This will install mysql and python-mysqldb. It also sets up the database
 for testing. 
@@ -36,29 +36,35 @@ http://www.mysqlperformanceblog.com/2013/07/01/tpcc-mysql-simple-usage-steps-and
 
 To collect traces
 =================
+```
 cd ./src
 python test_framework.py target-trace-dir
-
+```
 After running, the traces will be in target-trace-dir.
 
 You can choose which benchmark to run in test_framework.py.
 Please search 'scriptlist'.
 
 To run a little demo, you can do
+```
 cd ./src
 python test_framework.py /tmp
+```
 
 The default will run TutorialBench. 
 
 To parse the trace
 =================
+```
 cd ./src/
 python trace_scanner.py path-to-your-trace
+```
 
 The parsed result will be in the same directory of the trace.
 It is named as $tracename.table
 
 You can do a little demo with
+```
 cd ./src
 python trace_scanner test.trace
-
+```
