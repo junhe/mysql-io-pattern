@@ -30,12 +30,57 @@ Because I used that throughout the whole source code.
 If you use another password and  you don't want to modify it, you can 
 just replace all 8888 in the source coode. with your password.
 
+To run tpcc
+=================
 The script above does not prepare the environment for TPC-C. 
 To prepare TPCC, please follow in structions here:
 ```
 sudo apt-get install libmysqlclient-dev
+
+sudo apt-get install bzr
+bzr branch lp:~percona-dev/perconatools/tpcc-mysql
+make all
+
+mysqld &
+cd ~/tpcc-mysql
+mysql -u root -p -e "CREATE DATABASE tpcc1000;"
+mysql -u root -p tpcc1000 < create_table.sql
+mysql -u root -p tpcc1000 < add_fkey_idx.sql
+
+./tpcc_load 127.0.0.1 tpcc1000 root "8888" 20
 ```
 http://www.mysqlperformanceblog.com/2013/07/01/tpcc-mysql-simple-usage-steps-and-how-to-build-graphs-with-gnuplot/
+
+To change mysql data directory
+=================
+1. Stop MySQL using the following command:
+  ```
+  sudo /etc/init.d/mysql stop
+  ```
+
+2. Copy the existing data directory (default located in /var/lib/mysql) using the following command:
+  ```
+  sudo cp -R -p /var/lib/mysql /newpath
+  ```
+
+3. edit the MySQL configuration file with the following command:
+  ```
+  sudo gedit /etc/mysql/my.cnf
+  ```
+  Look for the entry for datadir, and change the path (which should be /var/lib/mysql) to the new data directory.
+
+4. found out that one needs to edit the file `/etc/apparmor.d/tunables/alias` to include a line "alias /var/lib/mysql/ -> /newpath/," With this in place, I did not need any changes in any of the other AppArmor files. It worked immediately after restarting AppArmor with "/etc/init.d/apparmor restart" and MySQL with "restart mysql"
+
+5. Restart the AppArmor profiles with the command:
+  ```
+  sudo /etc/init.d/apparmor reload
+  ```
+6. Restart MySQL with the command:
+  ```
+  sudo /etc/init.d/mysql restart
+  ```
+  Now login to MySQL and you can access the same databases you had before.
+
 
 To collect traces
 =================
