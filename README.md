@@ -80,6 +80,8 @@ To change mysql data directory
   sudo /etc/init.d/mysql restart
   ```
   Now login to MySQL and you can access the same databases you had before.
+  
+> Note that the datadir's owner must be mysql:mysql.
 
 To remove mysqld
 ==============================
