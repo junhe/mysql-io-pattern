@@ -53,6 +53,8 @@ http://www.mysqlperformanceblog.com/2013/07/01/tpcc-mysql-simple-usage-steps-and
 
 To change mysql data directory
 =================
+This (https://joshuarogers.net/moving-mysql-data-directory-ubuntu/) works.
+
 1. Stop MySQL using the following command:
   ```
   sudo /etc/init.d/mysql stop
