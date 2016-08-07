@@ -1,0 +1,419 @@
+#!/usr/bin/perl
+# Copyright (C) 2000-2003 MySQL AB
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; version 2
+# of the License.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+# MA 02111-1307, USA
+#
+# Test of creating a simple table and inserting $record_count records in it,
+# $opt_loop_count rows in order, $opt_loop_count rows in reverse order and
+# $opt_loop_count rows in random order
+#
+# changes made for Oracle compatibility
+# - $limits->{'func_odbc_mod'} is OK from crash-me, but it fails here so set we
+#   set it to 0 in server-cfg
+# - the default server config runs out of rollback segments, so we added a
+#   couple of disconnect/connects to reset
+#
+##################### Standard benchmark inits ##############################
+
+use Cwd;
+use DBI;
+use Benchmark;
+use Data::Dumper;
+
+$opt_loop_count=10000;		# number of rows/3
+$small_loop_count=10;		# Loop for full table retrieval
+$range_loop_count=$small_loop_count*50;
+$many_keys_loop_count=$opt_loop_count;
+$opt_read_key_loop_count=$opt_loop_count;
+
+$pwd = cwd(); $pwd = "." if ($pwd eq '');
+require "$pwd/bench-init.pl" || die "Can't read Configuration file: $!\n";
+
+if ($opt_small_test)
+{
+  $opt_loop_count/=100;
+  $many_keys_loop_count=$opt_loop_count/10;
+  $range_loop_count=10;
+  $opt_read_key_loop_count=10;
+}
+elsif ($opt_small_tables)
+{
+  $opt_loop_count=10000;		# number of rows/3
+  $many_keys_loop_count=$opt_loop_count;
+  $opt_read_key_loop_count=10;
+}
+elsif ($opt_small_key_tables)
+{
+  $many_keys_loop_count/=10;
+}
+
+if ($opt_loop_count < 100)
+{
+  $opt_loop_count=100;		# Some tests must have some data to work!
+}
+$range_loop_count=min($opt_loop_count,$range_loop_count);
+
+
+print "Testing the speed of inserting data into 1 table and do some selects on it.\n";
+print "The tests are done with a table that has $opt_loop_count rows.\n\n";
+
+####
+#### Generating random keys
+####
+
+print "Generating random keys\n";
+$random[$opt_loop_count]=0;
+for ($i=0 ; $i < $opt_loop_count ; $i++)
+{
+  $random[$i]=$i+$opt_loop_count;
+}
+
+my $tmpvar=1;
+for ($i=0 ; $i < $opt_loop_count ; $i++)
+{
+  $tmpvar^= ((($tmpvar + 63) + $i)*3 % $opt_loop_count);
+  $swap=$tmpvar % $opt_loop_count;
+  $tmp=$random[$i]; $random[$i]=$random[$swap]; $random[$swap]=$tmp;
+}
+
+$total_rows=$opt_loop_count*3;
+
+####
+####  Connect and start timeing
+####
+$start_time=new Benchmark;
+$dbh = $server->connect();
+####
+#### Create needed tables
+####
+
+goto keys_test if ($opt_stage == 2);
+goto select_test if ($opt_skip_create);
+
+print "Creating tables\n";
+$dbh->do("drop table bench1" . $server->{'drop_attr'});
+$dbh->do("drop table bench2" . $server->{'drop_attr'});
+$dbh->do("drop table bench3" . $server->{'drop_attr'});
+do_many($dbh,$server->create("bench1",
+			     ["id int NOT NULL",
+			      "id2 int NOT NULL",
+			      "id3 int NOT NULL",
+			      "dummy1 char(30)"],
+			     ["primary key (id,id2)",
+			     "index ix_id3 (id3)"]));
+
+if ($opt_lock_tables)
+{
+  $sth = $dbh->do("LOCK TABLES bench1 WRITE") || die $DBI::errstr;
+}
+
+####
+#### Insert $total_rows records in order, in reverse order and random.
+####
+
+$loop_time=new Benchmark;
+
+if ($opt_fast_insert)
+{
+  $query="insert into bench1 values ";
+}
+else
+{
+  $query="insert into bench1 (id,id2,id3,dummy1) values ";
+}
+
+if ($opt_fast && $server->{transactions})
+{
+  $dbh->{AutoCommit} = 0;
+  print "Transactions enabled\n" if ($opt_debug);
+}
+
+if (($opt_fast || $opt_fast_insert) && $server->{'limits'}->{'insert_multi_value'})
+{
+  $query_size=$server->{'limits'}->{'query_size'};
+
+  print "Inserting $opt_loop_count multiple-value rows in random order\n";
+  for ($i=0 ; $i < $opt_loop_count ; $i++)
+  {
+    $tmp= "(" . $random[$i] . "," . $random[$i] . "," . $random[$i] .
+      ",'CDEFGHIJKL')," or die $DBI::errstr;
+    if (length($tmp)+length($res) < $query_size)
+    {
+      $res.= $tmp;
+    }
+    else
+    {
+      $sth = $dbh->do(substr($res,0,length($res)-1)) or die $DBI::errstr;
+      $res=$query . $tmp;
+    }
+  }
+  $sth = $dbh->do(substr($res,0,length($res)-1)) or die $DBI::errstr;
+}
+else
+{
+  print "Inserting $opt_loop_count rows in random order\n";
+
+  for ($i=0 ; $i < $opt_loop_count ; $i++)
+  {
+    $sth = $dbh->do($query . "(". $random[$i] . "," . $random[$i] .
+		    "," . $random[$i] . ",'CDEFGHIJKL')") or die $DBI::errstr;
+  }
+}
+
+if ($opt_fast && $server->{transactions})
+{
+  $dbh->commit;
+  $dbh->{AutoCommit} = 1;
+}
+
+$end_time=new Benchmark;
+print "Time for insert (" . ($total_rows) . "): " .
+  timestr(timediff($end_time, $loop_time),"all") . "\n\n";
+
+if ($opt_lock_tables)
+{
+  $sth = $dbh->do("UNLOCK TABLES") || die $DBI::errstr;
+}
+if ($opt_fast && defined($server->{vacuum}))
+{
+  $server->vacuum(1,\$dbh,"bench1");
+}
+if ($opt_lock_tables)
+{
+  $sth = $dbh->do("LOCK TABLES bench1 WRITE") || die $DBI::errstr;
+}
+
+####
+#### End of benchmark
+####
+
+$dbh->disconnect;				# close connection
+
+end_benchmark($start_time);
+
+###
+### Some help functions
+###
+
+
+# Do some sample selects on direct key
+# First select finds a row, the second one doesn't find.
+
+sub check_select_key
+{
+  my ($sel_columns,$column,$check)= @_;
+  my ($loop_time,$end_time,$i,$tmp_var,$tmp,$count,$row_count,$estimated);
+
+  $estimated=0;
+  $loop_time=new Benchmark;
+  $count=0;
+  for ($i=1 ; $i <= $opt_read_key_loop_count; $i++)
+  {
+    $count+=2;
+    $tmpvar^= ((($tmpvar + 63) + $i)*3 % $opt_loop_count);
+    $tmp=$tmpvar % ($total_rows);
+    fetch_all_rows($dbh,"select $sel_columns from bench1 where $column=$tmp")
+      or die $DBI::errstr;
+    $tmp+=$total_rows;
+    defined($row_count=fetch_all_rows($dbh,"select $sel_columns from bench1 where $column=$tmp")) or die $DBI::errstr;
+    die "Found $row_count rows on impossible id: $tmp\n" if ($row_count);
+    $end_time=new Benchmark;
+    last if ($estimated=predict_query_time($loop_time,$end_time,\$count,$i,
+					   $opt_loop_count));
+  }
+  if ($estimated)
+  { print "Estimated time"; }
+  else
+  { print "Time"; }
+  print " for $check ($count): " .
+    timestr(timediff($end_time, $loop_time),"all") . "\n";
+}
+
+# Same as above, but select on 2 columns
+
+sub check_select_key2
+{
+  my ($sel_columns,$column,$column2,$check)= @_;
+  my ($loop_time,$end_time,$i,$tmp_var,$tmp,$count,$row_count,$estimated);
+
+  $estimated=0;
+  $loop_time=new Benchmark;
+  $count=0;
+  for ($i=1 ; $i <= $opt_read_key_loop_count; $i++)
+  {
+    $count+=2;
+    $tmpvar^= ((($tmpvar + 63) + $i)*3 % $opt_loop_count);
+    $tmp=$tmpvar % ($total_rows);
+    fetch_all_rows($dbh,"select $sel_columns from bench1 where $column=$tmp and $column2=$tmp")
+      or die $DBI::errstr;
+    $tmp+=$total_rows;
+    defined($row_count=fetch_all_rows($dbh,"select $sel_columns from bench1 where $column=$tmp and $column2=$tmp")) or die $DBI::errstr;
+    die "Found $row_count rows on impossible id: $tmp\n" if ($row_count);
+    $end_time=new Benchmark;
+    last if ($estimated=predict_query_time($loop_time,$end_time,\$count,$i,
+					   $opt_loop_count));
+  }
+  if ($estimated)
+  { print "Estimated time"; }
+  else
+  { print "Time"; }
+  print " for $check ($count): " .
+    timestr(timediff($end_time, $loop_time),"all") . "\n";
+}
+
+#
+# Search using some very simple queries
+#
+
+sub check_select_range
+{
+  my ($column,$check)= @_;
+  my ($loop_time,$end_time,$i,$tmp_var,$tmp,$query,$rows,$estimated);
+
+  $estimated=0;
+  $loop_time=new Benchmark;
+  $found=$count=0;
+  for ($test=1 ; $test <= $range_loop_count; $test++)
+  {
+    $count+=$#Q+1;
+    for ($i=0 ; $i < $#Q ; $i+=2)
+    {
+      $query=$Q[$i];
+      $rows=$Q[$i+1];
+      $query =~ s/!id!/$column/g;
+      if (($row_count=fetch_all_rows($dbh,$query)) != $rows)
+      {
+	if ($row_count == undef())
+	{
+	  die "Got error: $DBI::errstr when executing $query\n";
+	}
+	die "'$query' returned wrong number of rows: $row_count instead of $rows\n";
+      }
+      $found+=$row_count;
+    }
+    $end_time=new Benchmark;
+    last if ($estimated=predict_query_time($loop_time,$end_time,\$count,$test,
+					   $range_loop_count));
+  }
+  if ($estimated)
+  { print "Estimated time"; }
+  else
+  { print "Time"; }
+  print " for $check ($count:$found): " .
+    timestr(timediff($end_time, $loop_time),"all") . "\n";
+}
+
+
+#
+# SELECT * from bench where col=x or col=x or col=x ...
+
+
+sub check_or_range
+{
+  my ($column,$check)= @_;
+  my ($loop_time,$end_time,$i,$tmp_var,$tmp,$columns,$estimated,$found,
+      $or_part,$count,$loop_count);
+
+  $columns=min($limits->{'max_columns'},50,($limits->{'query_size'}-50)/13);
+  $columns=$columns- ($columns % 4); # Make Divisible by 4
+
+  $estimated=0;
+  $loop_time=new Benchmark;
+  $found=0;
+  # The number of tests must be divisible by the following
+  $tmp= $limits->{'func_extra_in_num'} ? 15 : 10; 
+  # We need to calculate the exact number of test to make 'Estimated' right
+  $loop_count=$range_loop_count*10+$tmp-1;
+  $loop_count=$loop_count- ($loop_count % $tmp);
+  
+  for ($count=0 ; $count < $loop_count ; )
+  {
+    for ($rowcnt=0; $rowcnt <= $columns; $rowcnt+= $columns/4)
+    {
+      my $query="select * from bench1 where ";
+      my $or_part= "$column = 1";
+      $count+=2;
+
+      for ($i=1 ; $i < $rowcnt ; $i++)
+      {
+	$tmpvar^= ((($tmpvar + 63) + $i)*3 % $opt_loop_count);
+	$tmp=$tmpvar % ($opt_loop_count*4);
+	$or_part.=" or $column=$tmp";
+      }
+      print $query . $or_part . "\n" if ($opt_debug);
+      ($rows=fetch_all_rows($dbh,$query . $or_part)) or die $DBI::errstr;
+      $found+=$rows;
+
+      if ($limits->{'func_extra_in_num'})
+      {
+	my $in_part=$or_part;	# Same query, but use 'func_extra_in_num' instead.
+	$in_part=~ s/ = / IN \(/;
+	$in_part=~ s/ or $column=/,/g;
+	$in_part.= ")";
+	fetch_all_rows($dbh,$query . $in_part) or die $DBI::errstr;
+	$count++;
+      }
+      # Do it a little harder by setting a extra range
+      defined(($rows=fetch_all_rows($dbh,"$query($or_part) and $column < 10"))) or die $DBI::errstr;
+      $found+=$rows;
+    }
+    $end_time=new Benchmark;
+    last if ($estimated=predict_query_time($loop_time,$end_time,\$count,$count,
+					   $loop_count));
+  }
+
+  if ($estimated)
+  { print "Estimated time"; }
+  else
+  { print "Time"; }
+  print " for $check ($count:$found): " .
+    timestr(timediff($end_time, $loop_time),"all") . "\n";
+}
+
+#
+# General test of SELECT ... WHERE id in(value-list)
+#
+
+sub test_where_in
+{
+  my ($t1,$t2,$id,$from,$to)= @_;
+
+  return if ($from >= $to);
+
+  $query="SELECT $t1.* FROM $t1 WHERE $id IN (";
+  for ($i=1 ; $i <= $to ; $i++)
+  {
+    $query.="$i,";
+  }
+  $query=substr($query,0,length($query)-1) . ")";
+
+  # Fill join table to have the same id's as 'query'
+  for ($i= $from ; $i <= $to ; $i++)
+  {
+    $dbh->do("insert into $t2 values($i)") or die $DBI::errstr;
+  }
+  if ($opt_fast && defined($server->{vacuum}))
+  {
+    $server->vacuum(1,\$dbh,"bench1");
+  }
+
+  time_fetch_all_rows("Testing SELECT ... WHERE id in ($to values)",
+		      "select_in", $query, $dbh,
+		      $range_loop_count);
+  time_fetch_all_rows(undef, "select_join_in",
+		      "SELECT $t1.* FROM $t2 left outer join $t1 on ($t1.$id=$t2.$id)",
+		       $dbh, $range_loop_count);
+}
