@@ -3,8 +3,6 @@ import pprint
 import glob
 import re
 
-import dataframe
-
 UNFINISHED_MARK = '<unfinished ...>'
 
 def match_line(line):
@@ -16,7 +14,7 @@ def match_line(line):
 def line_to_dic(line):
     """
     This function only handles normal line.
-    It does not handle interrupted lines.    
+    It does not handle interrupted lines.
     """
     dic = {
             'pid'  :None,
@@ -59,7 +57,7 @@ def line_to_dic(line):
             #print 'error:', line
     else:
         print 'cannot parse:', line
-    
+
     return dic
 
 def get_dic_from_unfinished(line):
@@ -123,7 +121,7 @@ def maintain_filep(filep, entrydict):
         add the fd->path mapping to fdmap
     else if entrydict is close:
         remove the fd->path mapping to fdmap
-    else if entrydict is read,write,...         
+    else if entrydict is read,write,...
         get filepath from fdmap by the fd
     add 'filepath' to entrydict
     """
@@ -172,7 +170,7 @@ def maintain_filep(filep, entrydict):
         newpid = entrydict['ret']
         if 'CLONE_FILES' in entrydict['args'][1]:
             filep[newpid] = filep[pid]
-            
+
     elif callname in ['dup', 'dup2', 'dup3']:
         newfd = entrydict['ret']
         assert newfd != '-1'
@@ -215,7 +213,7 @@ def maintain_filep(filep, entrydict):
                 length = int(entrydict['ret'])
                 filep[pid][fd]['pos'] = offset + length
             elif callname in ['pread', 'pwrite']:
-                # they don't affect filep offset 
+                # they don't affect filep offset
                 offset = int(entrydict['args'][3])
                 length = int(entrydict['ret'])
             elif callname in ['lseek']:
@@ -241,7 +239,7 @@ def scan_trace(tracepath):
     filep = {}
 
     tablefile = open(tracepath+'.table', 'w')
-    header=['pid', 'time', 'callname', 
+    header=['pid', 'time', 'callname',
             'offset', 'length', 'filepath', 'trace_name']
     tablefile.write( " ".join(header) + "\n" )
 
@@ -256,15 +254,15 @@ def scan_trace(tracepath):
         line = line.strip()
         if match_line(line):
             # normal line
-            entrydict = line_to_dic(line) 
-        #elif 'unfinished' in line: # 
+            entrydict = line_to_dic(line)
+        #elif 'unfinished' in line: #
         elif line.endswith(UNFINISHED_MARK):
-            #print 'unfinished line:', line 
+            #print 'unfinished line:', line
             udic = get_dic_from_unfinished(line)
             unfinished_dic[(udic['pid'], udic['callname'])] = udic
             continue
         elif 'resumed' in line:
-            #print 'resumed line:', line 
+            #print 'resumed line:', line
             udic = get_dic_from_resumed(line)
             name = udic['callname']
             pid = udic['pid']

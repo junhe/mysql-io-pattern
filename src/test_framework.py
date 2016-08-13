@@ -11,7 +11,7 @@ tinyscriptlist = [
         'create_table.py',
         'get_version.py',
         'retrieving_data.py',
-        #dictionary_cursor.py  
+        #dictionary_cursor.py
         'insert_image.py',
         'read_image.py',
         'prepared_statement.py']
@@ -78,7 +78,7 @@ def stop_mysqld():
     #cmd = "mysqladmin -u root -p8888 shutdown"
     #cmd = cmd.split()
     #subprocess.call(cmd)
-    
+
     #print 'tried to stop mysqld'
     #subprocess.call("sudo netstat -tap | grep mysql", shell=True)
     #time.sleep(2)
@@ -116,7 +116,7 @@ def run_script(scriptname):
         print 'wrong place!'
         subprocess.call(['python', scriptname])
     elif scriptname in sqlbenchlist:
-        run_sqlbench(scriptname)  
+        run_sqlbench(scriptname)
     elif scriptname == 'tpcc':
         run_tpcc()
 
